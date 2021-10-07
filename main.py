@@ -12,15 +12,15 @@ from criticality_score import run
 
 def lambda_handler(event: Dict[str, Any], context) -> Dict[str, Any]:
     start_time = datetime.now()
-    fn = context.function_name()
-    context.log(f'{fn} - received event: {event}')
+    fn = 'lambda_handler'
+    print(f'{fn} - received event: {event}')
 
     # Check the input - make sure we have everything
     if 'github_auth_token' not in event:
-        context.log(f'{fn} - unable to generate criticality score report - missing github_auth_token from event data')
+        print(f'{fn} - unable to generate criticality score report - missing github_auth_token from event data')
         return {}
     if 'repository' not in event:
-        context.log(f'{fn} - unable to generate criticality score report - missing target repository from event data')
+        print(f'{fn} - unable to generate criticality score report - missing target repository from event data')
         return {}
 
     # Set this value in the environment
@@ -32,7 +32,7 @@ def lambda_handler(event: Dict[str, Any], context) -> Dict[str, Any]:
 
     repo = run.get_repository(url)
     output = run.get_repository_stats(repo, [])
-    print(json.dumps(output, indent=4))
+    print(json.dumps(output, indent=2))
 
     # TODO: add to repository_statistics table
     # How to add to the DB?
