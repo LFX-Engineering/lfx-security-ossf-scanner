@@ -46,18 +46,17 @@ jobs:
       - *set_environment
       - *install-os-tools
       - run:
-          name: Install Top Level Dependencies
+          name: Install Serverless Dependences
           command: |
             echo "Node version is: $(node --version)"
+            echo "Yarn version is: $(yarn --version)"
             echo "Running top level install..."
             yarn install
       - run:
-          name: Setup Backend
+          name: Install Python Dependences
           command: |
-            yarn install
-            echo "Upgrading pip..."
-            python3 -m pip install --upgrade pip
-            sudo pip install -r requirements.txt
+            echo "Python version is: $(python --version)"
+            pip install -r requirements.txt
       - run:
           name: Deploy
           command: |
