@@ -7,11 +7,10 @@ import os
 from datetime import datetime
 from typing import Any, Dict
 
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from criticality_score import run
 
 
-def lambda_handler(event: Dict[str, Any], context: LambdaContext) -> Dict[str, Any]:
+def lambda_handler(event: Dict[str, Any], context) -> Dict[str, Any]:
     start_time = datetime.now()
     fn = context.function_name()
     context.log(f'{fn} - received event: {event}')
