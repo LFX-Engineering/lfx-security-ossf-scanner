@@ -36,7 +36,7 @@ jobs:
     docker:
       # See: https://circleci.com/developer/images/image/cimg/python
       # includes: build-essential 12.8ubuntu1.1, curl 7.68.0, docker 20.10.9, docker-compose 1.29.2, dockerize v0.6.1, git 2.33.0, java 11.0.11, jq 1.6, node 14.18.0, pip 21.2.3, pipenv 2021.5.29, poetry module, pyenv 2.1.0, python2 2.7.18, python3 3.10.0, selenium 3.141.59, ubuntu 20.04.3 LTS, virtualenv 20.8.1, wget 1.20.3, wheel 0.37.0, yarn 1.22.5
-      - image: cimg/python:3.10.0-node
+      - image: cimg/python:3.9.6-node
     steps:
       - checkout
       - add_ssh_keys:
