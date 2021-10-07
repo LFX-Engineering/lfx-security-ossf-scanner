@@ -11,14 +11,15 @@ from criticality_score import run
 
 def lambda_handler(event, context):
     start_time = datetime.now()
-    fn = context["function_name"]
+    fn = 'lambda_handler'
+    context.log(f'received event: {event}')
 
     # Check the input - make sure we have everything
     if 'github_auth_token' not in event:
-        print(f'unable to generate criticality score report - missing github_auth_token from event data')
+        context.log(f'unable to generate criticality score report - missing github_auth_token from event data')
         return
     if 'repository' not in event:
-        print(f'unable to generate criticality score report - missing target repository from event data')
+        context.log(f'unable to generate criticality score report - missing target repository from event data')
         return
 
     # Set this value in the environment
@@ -26,7 +27,7 @@ def lambda_handler(event, context):
 
     # extract our repository from the event data
     url = event["repository"]
-    print(f'{fn} - processing repository: {url}')
+    context.log(f'{fn} - processing repository: {url}')
 
     repo = run.get_repository(url)
     output = run.get_repository_stats(repo, [])
@@ -37,7 +38,7 @@ def lambda_handler(event, context):
     # 1. Direct DB Insert
     # 2. Send AWS SNS Message, but this seems overkill, not necessary
     # 3. Send API request via HTTPS, then API will add to the DB for me...
-    print(f'Finished processing - duration: {datetime.now() - start_time}')
+    context.log(f'Finished processing - duration: {datetime.now() - start_time}')
 
 
 def main():
