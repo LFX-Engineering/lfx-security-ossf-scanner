@@ -5,22 +5,24 @@
 import json
 import os
 from datetime import datetime
+from typing import Any, Dict
 
+from aws_lambda_powertools.utilities.typing import LambdaContext
 from criticality_score import run
 
 
-def lambda_handler(event, context):
+def lambda_handler(event: Dict[str, Any], context: LambdaContext) -> Dict[str, Any]:
     start_time = datetime.now()
-    fn = 'lambda_handler'
-    context.log(f'received event: {event}')
+    fn = context.function_name()
+    context.log(f'{fn} - received event: {event}')
 
     # Check the input - make sure we have everything
     if 'github_auth_token' not in event:
-        context.log(f'unable to generate criticality score report - missing github_auth_token from event data')
-        return
+        context.log(f'{fn} - unable to generate criticality score report - missing github_auth_token from event data')
+        return {}
     if 'repository' not in event:
-        context.log(f'unable to generate criticality score report - missing target repository from event data')
-        return
+        context.log(f'{fn} - unable to generate criticality score report - missing target repository from event data')
+        return {}
 
     # Set this value in the environment
     os.environ["GITHUB_AUTH_TOKEN"] = event['github_auth_token']
