@@ -1,9 +1,6 @@
 # Copyright The Linux Foundation and each contributor to LFX.
 # SPDX-License-Identifier: MIT
 
-# Golang CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2.1
 
 environment:
@@ -20,24 +17,6 @@ set_environment: &set_environment
       # Default Test User (functional test)
       echo 'export AWS_ACCESS_KEY_ID=${!AWS_ACCESS_KEY_ID_ENV_VAR}' >> $BASH_ENV
       echo 'export AWS_SECRET_ACCESS_KEY=${!AWS_SECRET_ACCESS_KEY_ENV_VAR}' >> $BASH_ENV
-
-      # The BluBracket API integration token used by LFx Security to authenticate and make BluBracket API requests - set in the CI/CD pipeline environment
-      echo 'export BLUBRACKET_API_TOKEN=${!BLUBRACKET_API_TOKEN_ENV_VAR}' >> $BASH_ENV
-
-      # The GitHub token to use when BluBracket is to scan a given repository - this _may_ be replaced by a rolling GitHub App token later - set in the CI/CD pipeline environment
-      echo 'export BLUBRACKET_GITHUB_TOKEN=${!BLUBRACKET_GITHUB_TOKEN_ENV_VAR}' >> $BASH_ENV
-
-      # The Snyk API integration token used by LFx Security to authenticate and make Snyk API requests - set in the CI/CD pipeline environment
-      echo 'export SNYK_API_TOKEN=${!SNYK_API_TOKEN_ENV_VAR}' >> $BASH_ENV
-
-      # The Snyk Account Group ID used by LFx Security to organize Organizations in the Snyk API/portal - set in the CI/CD pipeline
-      echo 'export SNYK_GROUP_ID=${!SNYK_GROUP_ID_ENV_VAR}' >> $BASH_ENV
-
-      # The GitHub token to use when Snyk is to scan a given repository - this _may_ be replaced by a rolling GitHub App token later - set in the CI/CD pipeline
-      echo 'export SNYK_GITHUB_TOKEN=${!SNYK_GITHUB_TOKEN_ENV_VAR}' >> $BASH_ENV
-
-      # The GitHub App/Bot WebHook Secret
-      echo 'export GITHUB_WEBHOOK_SECRET=${!GITHUB_WEBHOOK_SECRET_ENV_VAR}' >> $BASH_ENV
 
       # The database connection details - set in the CI/CD pipeline environment
       echo 'export POSTGRESQL_CONNECTION=${!POSTGRESQL_CONNECTION_ENV_VAR}' >> $BASH_ENV
@@ -88,17 +67,17 @@ step-library:
         echo "Pip version: $(pip --version)"
 
 jobs:
-  deploy:
+  deploy: &deploy_anchor
     docker:
-      - image: circleci/python:3.7.11-node
+      - image: circleci/node:12.18.1
     steps:
       - checkout
       - add_ssh_keys:
           fingerprints:
             - "e9:13:85:f1:b1:a1:25:bf:f5:44:34:66:82:1e:31:59"
       - run: echo 'export NVM_DIR=${HOME}/.nvm' >> $BASH_ENV
+      - *set_environment
       - *install-os-tools
-      - *install-node-12
       - *install-yarn
       - *install-python-3
       - run:
@@ -119,3 +98,82 @@ jobs:
           command: |
             if [[ ! -f serverless.yml ]]; then echo "Missing serverless.yml file in $(pwd). Exiting..."; exit 1; fi
             yarn sls deploy --force --stage ${STAGE} --region us-east-2
+
+  deploy_dev:
+    <<: *deploy_anchor
+    environment:
+      AWS_REGION: us-east-2
+      AWS_ACCESS_KEY_ID_ENV_VAR: AWS_ACCESS_KEY_ID_DEV
+      AWS_SECRET_ACCESS_KEY_ENV_VAR: AWS_SECRET_ACCESS_KEY_DEV
+      # The database connection details - set in the CI/CD pipeline
+      POSTGRESQL_CONNECTION_ENV_VAR: POSTGRESQL_CONNECTION_DEV
+      STAGE: dev
+
+  deploy_staging:
+    <<: *deploy_anchor
+    environment:
+      AWS_REGION: us-east-2
+      AWS_ACCESS_KEY_ID_ENV_VAR: AWS_ACCESS_KEY_ID_STAGING
+      AWS_SECRET_ACCESS_KEY_ENV_VAR: AWS_SECRET_ACCESS_KEY_STAGING
+      # The database connection details - set in the CI/CD pipeline
+      POSTGRESQL_CONNECTION_ENV_VAR: POSTGRESQL_CONNECTION_STAGING
+      STAGE: staging
+
+  deploy_prod:
+    <<: *deploy_anchor
+    environment:
+      AWS_REGION: us-east-2
+      AWS_ACCESS_KEY_ID_ENV_VAR: AWS_ACCESS_KEY_ID_PROD
+      AWS_SECRET_ACCESS_KEY_ENV_VAR: AWS_SECRET_ACCESS_KEY_PROD
+      # The database connection details - set in the CI/CD pipeline
+      POSTGRESQL_CONNECTION_ENV_VAR: POSTGRESQL_CONNECTION_PROD
+      STAGE: prod
+
+
+workflows:
+  deploy:
+    jobs:
+      - deploy_dev:
+          filters:
+            branches:
+              only: main
+            tags:
+              ignore: /.*/
+
+      - approve_staging:
+          type: approval
+          requires:
+            - deploy_dev
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+(\.\d+)?(\.\d+)?$/
+
+      - deploy_staging:
+          requires:
+            - approve_staging
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+(\.\d+)?(\.\d+)?$/
+
+      - approve_prod:
+          type: approval
+          requires:
+            - deploy_staging
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+(\.\d+)?(\.\d+)?$/
+
+      - deploy_prod:
+          requires:
+            - approve_prod
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+(\.\d+)?(\.\d+)?$/

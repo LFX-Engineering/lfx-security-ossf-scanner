@@ -1,7 +1,7 @@
 # Copyright The Linux Foundation and each contributor to LFX.
 # SPDX-License-Identifier: MIT
 
-service: lfx-securitry-ossf-scanner
+service: lfx-security-ossf-scanner
 frameworkVersion: '^2.57.0'
 variablesResolutionMode: 20210326
 
@@ -39,7 +39,7 @@ provider:
   runtime: python3.7
   stage: ${env:STAGE}
   region: us-east-2
-  timeout: 60 # optional, in seconds, default is 6
+  timeout: 900 # 15 minutes
   logRetentionInDays: 14
   lambdaHashingVersion: '20201221' # Resolution of lambda version hashes was improved with better algorithm, which will be used in next major release. Switch to it now by setting "provider.lambdaHashingVersion" to "20201221"
 
@@ -100,6 +100,7 @@ plugins:
   - serverless-prune-plugin
 
 functions:
-  ossf-scanner:
-    handler: handler.main
+  lfx-security-ossf-scanner:
+    name: lfx-security-ossf-scanner
+    handler: main.lambda_handler
     description: "LFX Security OSSF Repository Scanner"

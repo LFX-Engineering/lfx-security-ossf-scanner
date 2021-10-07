@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Ignore Serverless
+.serverless/
+
+# Test output file
+out.txt
+
 # Ignore idea
 .idea/
 
