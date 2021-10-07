@@ -1,0 +1,121 @@
+# Copyright The Linux Foundation and each contributor to LFX.
+# SPDX-License-Identifier: MIT
+
+# Golang CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-go/ for more details
+version: 2.1
+
+environment:
+  BASH_ENV: ~/.bashrc
+
+set_environment: &set_environment
+  run:
+    name: set deployment environment
+    command: |
+      cd && echo "Setting environment in $BASH_ENV for stage ${STAGE}" && touch $BASH_ENV
+
+      # Note, we place single quotes around the values to ensure any values
+      # with dollar signs are not intrepreted and expanded by accident
+      # Default Test User (functional test)
+      echo 'export AWS_ACCESS_KEY_ID=${!AWS_ACCESS_KEY_ID_ENV_VAR}' >> $BASH_ENV
+      echo 'export AWS_SECRET_ACCESS_KEY=${!AWS_SECRET_ACCESS_KEY_ENV_VAR}' >> $BASH_ENV
+
+      # The BluBracket API integration token used by LFx Security to authenticate and make BluBracket API requests - set in the CI/CD pipeline environment
+      echo 'export BLUBRACKET_API_TOKEN=${!BLUBRACKET_API_TOKEN_ENV_VAR}' >> $BASH_ENV
+
+      # The GitHub token to use when BluBracket is to scan a given repository - this _may_ be replaced by a rolling GitHub App token later - set in the CI/CD pipeline environment
+      echo 'export BLUBRACKET_GITHUB_TOKEN=${!BLUBRACKET_GITHUB_TOKEN_ENV_VAR}' >> $BASH_ENV
+
+      # The Snyk API integration token used by LFx Security to authenticate and make Snyk API requests - set in the CI/CD pipeline environment
+      echo 'export SNYK_API_TOKEN=${!SNYK_API_TOKEN_ENV_VAR}' >> $BASH_ENV
+
+      # The Snyk Account Group ID used by LFx Security to organize Organizations in the Snyk API/portal - set in the CI/CD pipeline
+      echo 'export SNYK_GROUP_ID=${!SNYK_GROUP_ID_ENV_VAR}' >> $BASH_ENV
+
+      # The GitHub token to use when Snyk is to scan a given repository - this _may_ be replaced by a rolling GitHub App token later - set in the CI/CD pipeline
+      echo 'export SNYK_GITHUB_TOKEN=${!SNYK_GITHUB_TOKEN_ENV_VAR}' >> $BASH_ENV
+
+      # The GitHub App/Bot WebHook Secret
+      echo 'export GITHUB_WEBHOOK_SECRET=${!GITHUB_WEBHOOK_SECRET_ENV_VAR}' >> $BASH_ENV
+
+      # The database connection details - set in the CI/CD pipeline environment
+      echo 'export POSTGRESQL_CONNECTION=${!POSTGRESQL_CONNECTION_ENV_VAR}' >> $BASH_ENV
+      # DATABASE_URL is used by dbmate to migrate the databases, for v2 we need to hit the bastian host to connect
+      echo 'export DATABASE_URL=${!POSTGRESQL_CONNECTION_ENV_VAR}' >> $BASH_ENV
+
+step-library:
+  - &install-os-tools
+    run:
+      name: Install OS tools on Debian
+      command: |
+        set +e
+        sudo apt update && sudo apt-get install file -y
+
+  - &install-node-12
+    run:
+      name: Install node 12 on Debian
+      command: |
+        set +e
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+        [ -s "${NVM_DIR}/nvm.sh" ] && \. "${NVM_DIR}/nvm.sh"
+        echo "Installing node v12.18.1..."
+        nvm install v12.18.1
+        nvm alias default v12.18.1
+        echo "[ -s \"${NVM_DIR}/nvm.sh\" ] && . \"${NVM_DIR}/nvm.sh\"" >> $BASH_ENV
+
+  - &install-yarn
+    run:
+      name: Install yarn on Debian
+      command: |
+        set +e
+        curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+        echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+        sudo apt update && sudo apt install -y yarn
+        echo "Yarn version: $(yarn --version)"
+
+  - &install-python-3
+    run:
+      name: Install Python 3 on Debian
+      command: |
+        set +e
+        cat /etc/debian_version
+        sudo DEBIAN_FRONTEND=noninteractive apt-get -y install python3 python3-pip
+        echo "Setting default version of python and pip..."
+        sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+        sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 2
+        echo "Python version: $(python --version)"
+        echo "Pip version: $(pip --version)"
+
+jobs:
+  deploy:
+    docker:
+      - image: circleci/python:3.7.11-node
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "e9:13:85:f1:b1:a1:25:bf:f5:44:34:66:82:1e:31:59"
+      - run: echo 'export NVM_DIR=${HOME}/.nvm' >> $BASH_ENV
+      - *install-os-tools
+      - *install-node-12
+      - *install-yarn
+      - *install-python-3
+      - run:
+          name: Install Top Level Dependencies
+          command: |
+            echo "Node version is: $(node --version)"
+            echo "Running top level install..."
+            yarn install
+      - run:
+          name: Setup Backend
+          command: |
+            yarn install
+            echo "Upgrading pip..."
+            python3 -m pip install --upgrade pip
+            sudo pip install -r requirements.txt
+      - run:
+          name: Deploy
+          command: |
+            if [[ ! -f serverless.yml ]]; then echo "Missing serverless.yml file in $(pwd). Exiting..."; exit 1; fi
+            yarn sls deploy --force --stage ${STAGE} --region us-east-2

@@ -1,0 +1,105 @@
+# Copyright The Linux Foundation and each contributor to LFX.
+# SPDX-License-Identifier: MIT
+
+service: lfx-securitry-ossf-scanner
+frameworkVersion: '^2.57.0'
+variablesResolutionMode: 20210326
+
+package:
+  # Exclude all first - selectively add in lambda functions
+  # Support for "package.include" and "package.exclude" will be removed with next major release. Please use "package.patterns" instead
+  # More Info: https://www.serverless.com/framework/docs/deprecations/#NEW_PACKAGE_PATTERNS
+  patterns:
+    - '!auth/**'
+    - '!bin/*'
+    - '!dev.sh'
+    - '!docs/**'
+    - '!helpers/**'
+    - '!Makefile'
+    - '!.env/**'
+    - '!.venv/**'
+    - '!.git*'
+    - '!.git/**'
+    - '!.vscode/**'
+    - '!.pylintrc'
+    - '!node_modules/**'
+    - '!package-lock.json'
+    - '!yarn.lock'
+    - '.serverless-wsgi'
+
+custom:
+  # Config for serverless-prune-plugin - remove all but the 10 most recent
+  # versions to avoid the "Code storage limit exceeded" error
+  prune:
+    automatic: true
+    number: 3
+
+provider:
+  name: aws
+  runtime: python3.7
+  stage: ${env:STAGE}
+  region: us-east-2
+  timeout: 60 # optional, in seconds, default is 6
+  logRetentionInDays: 14
+  lambdaHashingVersion: '20201221' # Resolution of lambda version hashes was improved with better algorithm, which will be used in next major release. Switch to it now by setting "provider.lambdaHashingVersion" to "20201221"
+
+  iam:
+    role:
+      # Alongside provider.iam.role.statements managed policies can also be added to this service-wide Role
+      # These will also be merged into the generated IAM Role
+      managedPolicies:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      statements:
+        - Effect: Allow
+          Action:
+            - cloudwatch:*
+          Resource: "*"
+        - Effect: Allow
+          Action:
+            - xray:PutTraceSegments
+            - xray:PutTelemetryRecords
+          Resource: "*"
+
+  environment:
+    STAGE: ${sls:stage}
+    HOME: /tmp
+    REGION: us-east-2
+    GITHUB_OAUTH_TOKEN: ${file(./env.json):gh-access-token, ssm:/cla-gh-access-token-${sls:stage}}
+
+  stackTags:
+    Name: ${self:service}
+    stage: ${sls:stage}
+    Project: "LFX Security"
+    Product: "LFX Security"
+    ManagedBy: "Serverless CloudFormation"
+    SericeType: "Product"
+    Service: ${self:service}
+    ServiceRole: "Backend"
+    ProgrammingPlatform: Python
+    Owner: "David Deal"
+  tags:
+    Name: ${self:service}
+    stage: ${sls:stage}
+    Project: "LFX Security"
+    Product: "LFX Security"
+    ManagedBy: "Serverless CloudFormation"
+    SericeType: "Product"
+    Service: ${self:service}
+    ServiceRole: "Backend"
+    ProgrammingPlatform: Python
+    Owner: "David Deal"
+
+plugins:
+  - serverless-python-requirements
+  - serverless-plugin-tracing
+  # Serverless Finch does s3 uploading. Called with 'sls client deploy'.
+  # Also allows bucket removal with 'sls client remove'.
+  - serverless-finch
+  # To avoid a Code Storage Limit after tons of deploys and revisions - we can prune old versions
+  # This plugin allows us to remove/prune the old versions either manually or automatically
+  - serverless-prune-plugin
+
+functions:
+  ossf-scanner:
+    handler: handler.main
+    description: "LFX Security OSSF Repository Scanner"
