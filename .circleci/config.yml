@@ -31,45 +31,12 @@ step-library:
         set +e
         sudo apt update && sudo apt-get install file -y
 
-  - &install-node-12
-    run:
-      name: Install node 12 on Debian
-      command: |
-        set +e
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
-        [ -s "${NVM_DIR}/nvm.sh" ] && \. "${NVM_DIR}/nvm.sh"
-        echo "Installing node v12.18.1..."
-        nvm install v12.18.1
-        nvm alias default v12.18.1
-        echo "[ -s \"${NVM_DIR}/nvm.sh\" ] && . \"${NVM_DIR}/nvm.sh\"" >> $BASH_ENV
-
-  - &install-yarn
-    run:
-      name: Install yarn on Debian
-      command: |
-        set +e
-        curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-        echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-        sudo apt update && sudo apt install -y yarn
-        echo "Yarn version: $(yarn --version)"
-
-  - &install-python-3
-    run:
-      name: Install Python 3 on Debian
-      command: |
-        set +e
-        cat /etc/debian_version
-        sudo DEBIAN_FRONTEND=noninteractive apt-get -y install python3 python3-pip
-        echo "Setting default version of python and pip..."
-        sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 2
-        sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 2
-        echo "Python version: $(python --version)"
-        echo "Pip version: $(pip --version)"
-
 jobs:
   deploy: &deploy_anchor
     docker:
-      - image: circleci/node:12.18.1
+      # See: https://circleci.com/developer/images/image/cimg/python
+      # includes: build-essential 12.8ubuntu1.1, curl 7.68.0, docker 20.10.9, docker-compose 1.29.2, dockerize v0.6.1, git 2.33.0, java 11.0.11, jq 1.6, node 14.18.0, pip 21.2.3, pipenv 2021.5.29, poetry module, pyenv 2.1.0, python2 2.7.18, python3 3.10.0, selenium 3.141.59, ubuntu 20.04.3 LTS, virtualenv 20.8.1, wget 1.20.3, wheel 0.37.0, yarn 1.22.5
+      - image: cimg/python:3.10.0-node
     steps:
       - checkout
       - add_ssh_keys:
@@ -78,8 +45,6 @@ jobs:
       - run: echo 'export NVM_DIR=${HOME}/.nvm' >> $BASH_ENV
       - *set_environment
       - *install-os-tools
-      - *install-yarn
-      - *install-python-3
       - run:
           name: Install Top Level Dependencies
           command: |
