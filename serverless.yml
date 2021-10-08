@@ -64,7 +64,13 @@ provider:
     STAGE: ${sls:stage}
     HOME: /tmp
     REGION: us-east-2
-    GITHUB_OAUTH_TOKEN: ${file(./env.json):gh-access-token, ssm:/cla-gh-access-token-${sls:stage}}
+    # The Auth0 Configuration details
+    AUTH0_PLATFORM_URL_ENV_VAR: ${env:AUTH0_PLATFORM_URL}
+    AUTH0_PLATFORM_CLIENT_ID_ENV_VAR: ${env:AUTH0_PLATFORM_CLIENT_ID}
+    AUTH0_PLATFORM_CLIENT_SECRET_ENV_VAR: ${env:AUTH0_PLATFORM_CLIENT_SECRET}
+    AUTH0_PLATFORM_AUDIENCE_ENV_VAR: ${env:AUTH0_PLATFORM_AUDIENCE}
+    # Logging format, text or json
+    LOG_FORMAT: json
 
   stackTags:
     Name: ${self:service}
