@@ -98,7 +98,7 @@ def get_access_token():
         return None
 
 
-def send_data(project_id: str, project_sfid: str, score_data: Dict[str, Any], stage: str) -> None:
+def send_data(project_id: str, project_sfid: str, repository_id: str, score_data: Dict[str, Any], stage: str) -> None:
     fn = 'send_data'
     if stage == 'dev':
         url = f'https://api-gw.dev.platform.linuxfoundation.org/security-service/v2/{project_sfid}/ossf-scores'
@@ -113,6 +113,7 @@ def send_data(project_id: str, project_sfid: str, score_data: Dict[str, Any], st
     payload = {
         'project_id': project_id,
         'project_sfid': project_sfid,
+        'repository_id': repository_id,
         'language': score_data.get('language', ''),
         'created_since': score_data.get('created_since', 0),
         'updated_since': score_data.get('updated_since', 0),
@@ -129,14 +130,18 @@ def send_data(project_id: str, project_sfid: str, score_data: Dict[str, Any], st
 
     headers = {
         'Authorization': f'bearer {get_access_token()}',
-        'content-type': 'application/json',
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
     }
 
     try:
-        print(f'Sending request to: {url} with payload: {payload}')
+        print(f'Sending POST request to: {url} with payload: {payload}')
         r = requests.post(url, json=payload, headers=headers)
         r.raise_for_status()
-        print(f'{fn} - successfully send add repository ossf scores data...')
+        if r.status_code < 200 or r.status_code > 299:
+            print(f'{fn} - invalid response status code received: {r.status_code} - error: {r.text}')
+        else:
+            print(f'{fn} - successfully send add repository ossf scores data...')
     except requests.exceptions.HTTPError as err:
         print(f'{fn} - invalid response from add repository ossf scores endpoint, error: {err}')
     return None
@@ -162,12 +167,13 @@ def lambda_handler(event: Dict[str, Any], context) -> Dict[str, Any]:
 
     project_id = event['project_id']
     project_sfid = event['project_sfid']
+    repository_id = event['repository_id']
     print(f'{fn} - {stage} - processing repository: {url}')
 
     repo = run.get_repository(url)
     output = run.get_repository_stats(repo, [])
     print(f'{fn} - {stage} - received data: {json.dumps(output, indent=2)}')
-    send_data(project_id, project_sfid, output, stage)
+    send_data(project_id, project_sfid, repository_id, output, stage)
 
     # TODO: add to repository_statistics table
     # How to add to the DB?
@@ -185,11 +191,11 @@ def main():
 
     # Event data for the lambda
     event = {
-        "project_id": "",
-        "project_sfid": "",
+        "project_id": "38e2ef0e-1983-4c92-a9f0-98255cd61af1",
+        "project_sfid": "a092M00001IV7AiQAL",
         "repository_id": "435f5013-4406-4fcc-954c-d21a6a9f289b",
-        "repository_url": "github.com/communitybridge/easycla",
-        "github_auth_token": os.environ['GITHUB_AUTH_TOKEN'],
+        "repository_url": "https://github.com/communitybridge/easycla",
+        "github_auth_token": 'ghs_weCQdmyeIa4jk9YO3jwG2mdr5MxTmQ2W78xb',
     }
 
     # Context data for the lambda
