@@ -10,28 +10,42 @@ from typing import Any, Dict
 from criticality_score import run
 
 
+def validate_input(event: Dict[str, Any]) -> bool:
+    fn = 'validate_input'
+
+    # Check the input - make sure we have everything
+    if 'STAGE' not in os.environ:
+        print(f'missing STAGE environment variable')
+    if 'github_auth_token' not in event:
+        print(f'{fn} - unable to generate criticality score report - missing github_auth_token from event data')
+        return False
+    if 'repository' not in event:
+        print(f'{fn} - unable to generate criticality score report - missing target repository from event data')
+        return False
+    if 'repository_id' not in event:
+        print(f'{fn} - unable to generate criticality score report - missing target repository_url from event data')
+        return False
+
+    return True
+
+
 def lambda_handler(event: Dict[str, Any], context) -> Dict[str, Any]:
     start_time = datetime.now()
     fn = 'lambda_handler'
     print(f'{fn} - received event: {event}')
 
     # Check the input - make sure we have everything
-    if 'github_auth_token' not in event:
-        print(f'{fn} - unable to generate criticality score report - missing github_auth_token from event data')
-        return {}
-    if 'repository' not in event:
-        print(f'{fn} - unable to generate criticality score report - missing target repository from event data')
-        return {}
-    if 'repository_id' not in event:
-        print(f'{fn} - unable to generate criticality score report - missing target repository_url from event data')
+    if not validate_input(event):
         return {}
 
     # Set this value in the environment
     os.environ["GITHUB_AUTH_TOKEN"] = event['github_auth_token']
 
+    stage = os.environ['STAGE']
+
     # extract our repository from the event data
     url = event["repository"]
-    print(f'{fn} - processing repository: {url}')
+    print(f'{fn} - {stage} - processing repository: {url}')
 
     repo = run.get_repository(url)
     output = run.get_repository_stats(repo, [])
@@ -53,9 +67,10 @@ def main():
 
     # Event data for the lambda
     event = {
+        "stage": os.environ['STAGE'],
         "repository_id": "435f5013-4406-4fcc-954c-d21a6a9f289b",
         "repository": "github.com/communitybridge/easycla",
-        "github_auth_token": os.environ['GITHUB_AUTH_TOKEN']
+        "github_auth_token": os.environ['GITHUB_AUTH_TOKEN'],
     }
 
     # Context data for the lambda
