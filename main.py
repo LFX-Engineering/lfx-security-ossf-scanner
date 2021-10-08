@@ -35,17 +35,32 @@ def validate_input(event: Dict[str, Any]) -> bool:
     if 'github_auth_token' not in event:
         print(f'{fn} - unable to generate criticality score report - missing github_auth_token from event data')
         valid = False
-    if 'repository' not in event:
-        print(f'{fn} - unable to generate criticality score report - missing target repository from event data')
+    if event['github_auth_token'] == '':
+        print(f'{fn} - unable to generate criticality score report - github_auth_token value is empty')
+        valid = False
+    if 'repository_url' not in event:
+        print(f'{fn} - unable to generate criticality score report - missing target repository_url from event data')
+        valid = False
+    if event['repository_url'] == '':
+        print(f'{fn} - unable to generate criticality score report - repository_url value is empty')
         valid = False
     if 'repository_id' not in event:
         print(f'{fn} - unable to generate criticality score report - missing target repository_url from event data')
         valid = False
+    if event['repository_id'] == '':
+        print(f'{fn} - unable to generate criticality score report - repository_id value is empty')
+        valid = False
     if 'project_id' not in event:
         print(f'{fn} - unable to generate criticality score report - missing project_id from event data')
         valid = False
+    if event['project_id'] == '':
+        print(f'{fn} - unable to generate criticality score report - project_id value is empty')
+        valid = False
     if 'project_sfid' not in event:
         print(f'{fn} - unable to generate criticality score report - missing project_sfid from event data')
+        valid = False
+    if event['project_sfid'] == '':
+        print(f'{fn} - unable to generate criticality score report - project_sfid value is empty')
         valid = False
 
     return valid
@@ -140,7 +155,7 @@ def lambda_handler(event: Dict[str, Any], context) -> Dict[str, Any]:
     stage = os.environ['STAGE']
 
     # extract our repository from the event data
-    url = event['repository']
+    url = event['repository_url']
     project_id = event['project_id']
     project_sfid = event['project_sfid']
     print(f'{fn} - {stage} - processing repository: {url}')
@@ -169,7 +184,7 @@ def main():
         "project_id": "",
         "project_sfid": "",
         "repository_id": "435f5013-4406-4fcc-954c-d21a6a9f289b",
-        "repository": "github.com/communitybridge/easycla",
+        "repository_url": "github.com/communitybridge/easycla",
         "github_auth_token": os.environ['GITHUB_AUTH_TOKEN'],
     }
 
