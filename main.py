@@ -5,6 +5,7 @@
 
 import json
 import os
+import re
 from datetime import datetime
 from typing import Any, Dict
 
@@ -156,6 +157,8 @@ def lambda_handler(event: Dict[str, Any], context) -> Dict[str, Any]:
 
     # extract our repository from the event data
     url = event['repository_url']
+    url = re.sub(r'^https?://', '', url, flags=re.IGNORECASE)
+
     project_id = event['project_id']
     project_sfid = event['project_sfid']
     print(f'{fn} - {stage} - processing repository: {url}')
