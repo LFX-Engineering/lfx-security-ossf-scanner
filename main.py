@@ -22,13 +22,16 @@ def lambda_handler(event: Dict[str, Any], context) -> Dict[str, Any]:
     if 'repository' not in event:
         print(f'{fn} - unable to generate criticality score report - missing target repository from event data')
         return {}
+    if 'repository_id' not in event:
+        print(f'{fn} - unable to generate criticality score report - missing target repository_url from event data')
+        return {}
 
     # Set this value in the environment
     os.environ["GITHUB_AUTH_TOKEN"] = event['github_auth_token']
 
     # extract our repository from the event data
     url = event["repository"]
-    context.log(f'{fn} - processing repository: {url}')
+    print(f'{fn} - processing repository: {url}')
 
     repo = run.get_repository(url)
     output = run.get_repository_stats(repo, [])
@@ -39,7 +42,7 @@ def lambda_handler(event: Dict[str, Any], context) -> Dict[str, Any]:
     # 1. Direct DB Insert
     # 2. Send AWS SNS Message, but this seems overkill, not necessary
     # 3. Send API request via HTTPS, then API will add to the DB for me...
-    context.log(f'Finished processing - duration: {datetime.now() - start_time}')
+    print(f'Finished processing - duration: {datetime.now() - start_time}')
 
 
 def main():
@@ -50,7 +53,8 @@ def main():
 
     # Event data for the lambda
     event = {
-        "repository": "github.com/communitybridge/easycla-contributor-console",
+        "repository_id": "435f5013-4406-4fcc-954c-d21a6a9f289b",
+        "repository": "github.com/communitybridge/easycla",
         "github_auth_token": os.environ['GITHUB_AUTH_TOKEN']
     }
 
