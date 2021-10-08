@@ -17,7 +17,7 @@ yarn deploy:dev
 aws --region us-east-2 lambda invoke \
   --function-name lfx-securitry-ossf-scanner-dev-ossf-scanner \
   --cli-binary-format raw-in-base64-out \
-  --payload '{"repository":"github.com/communitybridge/easycla", "github_auth_token":"ghs_XXXX..."}' \
+  --payload '{"repository_id": "435f5013-4406-4fcc-954c-d21a6a9f289b", "repository":"github.com/communitybridge/easycla", "github_auth_token":"ghs_XXXX..."}' \
   out.txt
 ```
 
