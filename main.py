@@ -129,11 +129,12 @@ def send_data(project_id: str, project_sfid: str, score_data: Dict[str, Any], st
 
     headers = {
         'Authorization': f'bearer {get_access_token()}',
-        'accept': 'application/json'
+        'accept': 'application/json',
+        'content-type': 'application/x-www-form-urlencoded',
     }
 
     try:
-        r = requests.post(url, data=payload, headers=headers)
+        r = requests.post(url, json=payload, headers=headers)
         r.raise_for_status()
         print(f'{fn} - successfully send add repository ossf scores data...')
     except requests.exceptions.HTTPError as err:
