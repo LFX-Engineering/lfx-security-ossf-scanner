@@ -33,34 +33,34 @@ def validate_input(event: Dict[str, Any]) -> bool:
     if 'AUTH0_PLATFORM_AUDIENCE' not in os.environ:
         print(f'missing AUTH0_PLATFORM_AUDIENCE environment variable')
         valid = False
-    if 'github_auth_token' not in event:
+    if 'github_auth_token' not in event['body']:
         print(f'{fn} - unable to generate criticality score report - missing github_auth_token from event data')
         valid = False
-    if event['github_auth_token'] == '':
+    if event['body']['github_auth_token'] == '':
         print(f'{fn} - unable to generate criticality score report - github_auth_token value is empty')
         valid = False
-    if 'repository_url' not in event:
+    if 'repository_url' not in event['body']:
         print(f'{fn} - unable to generate criticality score report - missing target repository_url from event data')
         valid = False
-    if event['repository_url'] == '':
+    if event['body']['repository_url'] == '':
         print(f'{fn} - unable to generate criticality score report - repository_url value is empty')
         valid = False
-    if 'repository_id' not in event:
+    if 'repository_id' not in event['body']:
         print(f'{fn} - unable to generate criticality score report - missing target repository_url from event data')
         valid = False
-    if event['repository_id'] == '':
+    if event['body']['repository_id'] == '':
         print(f'{fn} - unable to generate criticality score report - repository_id value is empty')
         valid = False
-    if 'project_id' not in event:
+    if 'project_id' not in event['body']:
         print(f'{fn} - unable to generate criticality score report - missing project_id from event data')
         valid = False
-    if event['project_id'] == '':
+    if event['body']['project_id'] == '':
         print(f'{fn} - unable to generate criticality score report - project_id value is empty')
         valid = False
-    if 'project_sfid' not in event:
+    if 'project_sfid' not in event['body']:
         print(f'{fn} - unable to generate criticality score report - missing project_sfid from event data')
         valid = False
-    if event['project_sfid'] == '':
+    if event['body']['project_sfid'] == '':
         print(f'{fn} - unable to generate criticality score report - project_sfid value is empty')
         valid = False
 
