@@ -167,13 +167,20 @@ def lambda_handler(event: Dict[str, Any], context) -> Dict[str, Any]:
 
     project_id = event['project_id']
     project_sfid = event['project_sfid']
+    project_name = event['project_name']
     repository_id = event['repository_id']
     print(f'{fn} - {stage} - processing repository: {url}')
 
-    repo = run.get_repository(url)
-    output = run.get_repository_stats(repo, [])
-    print(f'{fn} - {stage} - received data: {json.dumps(output, indent=2)}')
-    send_data(project_id, project_sfid, repository_id, output, stage)
+    try:
+        repo = run.get_repository(url)
+        output = run.get_repository_stats(repo, [])
+        print(f'{fn} - {stage} - received data: {json.dumps(output, indent=2)}')
+        send_data(project_id, project_sfid, repository_id, output, stage)
+    except Exception as ex:
+        print(f'{fn} - problem fetching repository details or stats '
+              f'for project: {project_name} '
+              f'with sfid: {project_sfid}. '
+              f'error is: {ex}')
 
     # TODO: add to repository_statistics table
     # How to add to the DB?
