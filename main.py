@@ -153,7 +153,7 @@ def lambda_handler(event: Dict[str, Any], context) -> Dict[str, Any]:
     print(f'{fn} - received event: {event} with context: {context}')
 
     # Check the input - make sure we have everything
-    if not validate_input(event['body']):
+    if not validate_input(event):
         return {}
 
     # Set this value in the environment
