@@ -152,8 +152,16 @@ def lambda_handler(event: Dict[str, Any], context) -> Dict[str, Any]:
     fn = 'lambda_handler'
     print(f'{fn} - received event: {event} with context: {context}')
 
+    if 'body' not in event:
+        print(f'{fn} - received event with no body - unable to process message')
+        return {}
+
+    # json_data = json.dumps(event)
+    print(f'{fn} - event {type(event)}: {event}')
+    print(f'{fn} - event {type(dict(event))}: {dict(event)}')
+
     # Check the input - make sure we have everything
-    if not validate_input(event):
+    if not validate_input(dict(event)):
         return {}
 
     # Set this value in the environment
@@ -207,7 +215,7 @@ def main():
             "project_id": "38e2ef0e-1983-4c92-a9f0-98255cd61af1",
             "project_sfid": "a092M000000000000000000000",
             "project_name": "Foo",
-            "created_date_time": datetime.utcnow().time(),
+            "created_date_time": 0,
             "repository_id": "435f5013-4406-4fcc-954c-zzzzzzzzzzzzzzz",
             "repository_url": "https://github.com/communitybridge/easycla",
             "github_auth_token": 'ghs_XYZ......',
