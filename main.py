@@ -153,22 +153,22 @@ def lambda_handler(event: Dict[str, Any], context) -> Dict[str, Any]:
     print(f'{fn} - received event: {event} with context: {context}')
 
     # Check the input - make sure we have everything
-    if not validate_input(event):
+    if not validate_input(event['body']):
         return {}
 
     # Set this value in the environment
-    os.environ["GITHUB_AUTH_TOKEN"] = event['github_auth_token']
+    os.environ["GITHUB_AUTH_TOKEN"] = event['body']['github_auth_token']
 
     stage = os.environ['STAGE']
 
     # extract our repository from the event data
-    url = event['repository_url']
+    url = event['body']['repository_url']
     url = re.sub(r'^https?://', '', url, flags=re.IGNORECASE)
 
-    project_id = event['project_id']
-    project_sfid = event['project_sfid']
-    project_name = event['project_name']
-    repository_id = event['repository_id']
+    project_id = event['body']['project_id']
+    project_sfid = event['body']['project_sfid']
+    project_name = event['body']['project_name']
+    repository_id = event['body']['repository_id']
     print(f'{fn} - {stage} - processing repository: {url}')
 
     try:
@@ -198,16 +198,20 @@ def main():
 
     # Event data for the lambda - below are test/junk values
     event = {
-        "id": "38e2ef0e-1983-4444-aaaa-222222222222",
-        "type": "ossf_scan",
-        "version": "v1",
-        "project_id": "38e2ef0e-1983-4c92-a9f0-98255cd61af1",
-        "project_sfid": "a092M000000000000000000000",
-        "project_name": "Foo",
-        "created_date_time": datetime.utcnow().time(),
-        "repository_id": "435f5013-4406-4fcc-954c-zzzzzzzzzzzzzzz",
-        "repository_url": "https://github.com/communitybridge/easycla",
-        "github_auth_token": 'ghs_XYZ......',
+        # Consider adding additional meta-data for this message
+        # See: https://docs.aws.amazon.com/lambda/latest/dg/services-apigateway.html
+        "body": {
+            "id": "38e2ef0e-1983-4444-aaaa-222222222222",
+            "type": "ossf_scan",
+            "version": "v1",
+            "project_id": "38e2ef0e-1983-4c92-a9f0-98255cd61af1",
+            "project_sfid": "a092M000000000000000000000",
+            "project_name": "Foo",
+            "created_date_time": datetime.utcnow().time(),
+            "repository_id": "435f5013-4406-4fcc-954c-zzzzzzzzzzzzzzz",
+            "repository_url": "https://github.com/communitybridge/easycla",
+            "github_auth_token": 'ghs_XYZ......',
+        }
     }
 
     # Context data for the lambda
