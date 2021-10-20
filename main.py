@@ -189,13 +189,18 @@ def main():
     if 'GITHUB_AUTH_TOKEN' not in os.environ:
         print(f'missing GITHUB_AUTH_TOKEN environment variable')
 
-    # Event data for the lambda
+    # Event data for the lambda - below are test/junk values
     event = {
+        "id": "38e2ef0e-1983-4444-aaaa-222222222222",
+        "type": "ossf_scan",
+        "version": "v1",
         "project_id": "38e2ef0e-1983-4c92-a9f0-98255cd61af1",
-        "project_sfid": "a092M00001IV7AiQAL",
-        "repository_id": "435f5013-4406-4fcc-954c-d21a6a9f289b",
+        "project_sfid": "a092M000000000000000000000",
+        "project_name": "Foo",
+        "created_date_time": datetime.utcnow().time(),
+        "repository_id": "435f5013-4406-4fcc-954c-zzzzzzzzzzzzzzz",
         "repository_url": "https://github.com/communitybridge/easycla",
-        "github_auth_token": 'ghs_weCQdmyeIa4jk9YO3jwG2mdr5MxTmQ2W78xb',
+        "github_auth_token": 'ghs_XYZ......',
     }
 
     # Context data for the lambda
