@@ -189,11 +189,6 @@ def lambda_handler(event: Dict[str, Any], context) -> Dict[str, Any]:
               f'with sfid: {project_sfid}. '
               f'error is: {ex}')
 
-    # TODO: add to repository_statistics table
-    # How to add to the DB?
-    # 1. Direct DB Insert
-    # 2. Send AWS SNS Message, but this seems overkill, not necessary
-    # 3. Send API request via HTTPS, then API will add to the DB for me...
     print(f'Finished processing - duration: {datetime.now() - start_time}')
 
 
