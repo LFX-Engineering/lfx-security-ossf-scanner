@@ -1,0 +1,49 @@
+---
+# Copyright The Linux Foundation and each contributor to LFX.
+# SPDX-License-Identifier: MIT
+
+name: Build and Deploy DEV
+
+on:
+  # https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+      - name: Setup
+        run: |
+          echo "Node version is: $(node --version)"
+          echo "Yarn version is: $(yarn --version)"
+          echo "Running top level install..."
+          yarn install
+      - name: Install Python Dependences
+        run: |
+          echo "Python version is: $(python --version)"
+          pip install -r requirements.txt
+      - name: Deploy Backend
+        run: |
+          yarn install
+          echo "Deploying backend for stage ${STAGE} in region ${AWS_REGION}"
+          SLS_DEBUG=* yarn sls deploy --verbose -s ${STAGE} -r ${AWS_REGION}
+        env:
+          AWS_REGION: us-east-2
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          AUTH0_PLATFORM_URL: ${{ secrets.AUTH0_PLATFORM_URL_DEV }}
+          AUTH0_PLATFORM_CLIENT_ID: ${{ secrets.AUTH0_PLATFORM_CLIENT_ID_DEV }}
+          AUTH0_PLATFORM_CLIENT_SECRET: ${{ secrets.AUTH0_PLATFORM_CLIENT_SECRET_DEV }}
+          AUTH0_PLATFORM_AUDIENCE: ${{ secrets.AUTH0_PLATFORM_AUDIENCE_DEV }}
+          STAGE: dev
