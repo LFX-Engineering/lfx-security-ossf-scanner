@@ -33,3 +33,20 @@ jobs:
         run: |
           echo "Python version is: $(python --version)"
           pip install -r requirements.txt
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_ORG: ${{ secrets.SNYK_ORG }}
+        with:
+          command: test
+          args: --org=${{ secrets.SNYK_ORG }} --severity-threshold=high --all-projects
+      - name: Run Snyk to upload vulnerabilities
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_ORG: ${{ secrets.SNYK_ORG }}
+        with:
+          command: monitor
+          args: --org=${{ secrets.SNYK_ORG }} --severity-threshold=high --all-projects
