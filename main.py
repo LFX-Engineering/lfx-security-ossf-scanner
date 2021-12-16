@@ -173,7 +173,7 @@ def send_data(project_id: str, project_sfid: str, repository_id: str, score_data
 
 
 def lambda_handler(event: Dict[str, Any], context) -> Dict[str, Any]:
-    start_time = datetime.now()
+    start_time = datetime.datetime.now()
     fn = 'lambda_handler'
     print(f'{fn} - received event: {event} with context: {context}')
 
@@ -214,7 +214,7 @@ def lambda_handler(event: Dict[str, Any], context) -> Dict[str, Any]:
               f'with sfid: {project_sfid}. '
               f'error is: {ex}')
 
-    print(f'Finished processing - duration: {datetime.now() - start_time}')
+    print(f'Finished processing - duration: {datetime.datetime.now() - start_time}')
 
 
 def main():
