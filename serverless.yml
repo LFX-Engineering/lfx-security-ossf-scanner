@@ -26,6 +26,7 @@ package:
     - '!package-lock.json'
     - '!yarn.lock'
     - '.serverless-wsgi'
+    - '*.py'
 
 custom:
   # Config for serverless-prune-plugin - remove all but the 10 most recent
