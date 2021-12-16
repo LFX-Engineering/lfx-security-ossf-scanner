@@ -12,6 +12,10 @@ from typing import Any, Dict
 import requests
 from criticality_score import run
 
+from token import TokenManager
+
+token_manager = TokenManager()
+
 
 def validate_input(event_body: Dict[str, Any]) -> bool:
     fn = 'validate_input'
@@ -67,37 +71,6 @@ def validate_input(event_body: Dict[str, Any]) -> bool:
     return valid
 
 
-def get_access_token():
-    fn = 'get_access_token'
-
-    auth0_url = os.environ['AUTH0_PLATFORM_URL']
-    platform_client_id = os.environ['AUTH0_PLATFORM_CLIENT_ID']
-    platform_client_secret = os.environ['AUTH0_PLATFORM_CLIENT_SECRET']
-    platform_audience = os.environ['AUTH0_PLATFORM_AUDIENCE']
-
-    auth0_payload = {
-        'grant_type': 'client_credentials',
-        'client_id': platform_client_id,
-        'client_secret': platform_client_secret,
-        'audience': platform_audience
-    }
-
-    headers = {
-        'content-type': 'application/x-www-form-urlencoded',
-        'accept': 'application/json'
-    }
-
-    try:
-        r = requests.post(auth0_url, data=auth0_payload, headers=headers)
-        r.raise_for_status()
-        json_data = json.loads(r.text)
-        print(f'{fn} - successfully obtained access_token: {json_data["access_token"][0:10]}...')
-        return json_data["access_token"]
-    except requests.exceptions.HTTPError as err:
-        print(f'{fn} - could not get auth token, error: {err}')
-        return None
-
-
 def send_data(project_id: str, project_sfid: str, repository_id: str, score_data: Dict[str, Any], stage: str) -> None:
     fn = 'send_data'
     if stage == 'dev':
@@ -129,7 +102,7 @@ def send_data(project_id: str, project_sfid: str, repository_id: str, score_data
     }
 
     headers = {
-        'Authorization': f'bearer {get_access_token()}',
+        'Authorization': f'bearer {token_manager.get_access_token()}',
         'Content-type': 'application/json',
         'Accept': 'application/json',
     }
@@ -196,7 +169,7 @@ def main():
     # invoked from the command line
 
     if 'GITHUB_AUTH_TOKEN' not in os.environ:
-        print(f'missing GITHUB_AUTH_TOKEN environment variable')
+        print('missing GITHUB_AUTH_TOKEN environment variable')
 
     # Event data for the lambda - below are test/junk values
     # event = {

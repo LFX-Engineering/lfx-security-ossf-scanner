@@ -30,6 +30,7 @@
     "node-fetch": "^2.6.1",
     "normalize-url": "^4.5.1",
     "set-value": "^4.0.1",
+    "shell-quote": "^1.7.3",
     "ws": "^7.4.6",
     "xmlhttprequest-ssl": "^1.6.2"
   }
