@@ -17,7 +17,7 @@ yarn deploy:dev
 # First: Log into your AWS account for the appropriate environment
 # Second: invoke using the desired payload, adjust the target repository and provide a GitHub authorization token value
 aws --region us-east-2 lambda invoke \
-  --function-name lfx-securitry-ossf-scanner-dev-ossf-scanner \
+  --function-name lfx-security-ossf-scanner \
   --cli-binary-format raw-in-base64-out \
   --payload '{"project_id":"...", "project_sfid": "...", "repository_id": "...", "repository_url":"github.com/communitybridge/easycla", "github_auth_token":"ghs_XXXX..."}' \
   out.txt

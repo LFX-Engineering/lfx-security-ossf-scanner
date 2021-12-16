@@ -3,16 +3,68 @@
 # Copyright The Linux Foundation and each contributor to CommunityBridge.
 # SPDX-License-Identifier: MIT
 
+import datetime
 import json
 import os
 import re
-from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import requests
 from criticality_score import run
 
-from token import TokenManager
+
+class TokenManager:
+    """
+    Token manager wraps the business logic of fetching, caching, expiring and providing access to the access token.
+    """
+
+    def __init__(self):
+        self.token = None
+        self.expires = None
+
+    def __str__(self):
+        return f'TokenManager token {self.token[0:10]}... expires {self.expires}'
+
+    def invalidate_token(self):
+        self.token = None
+        self.expires = datetime.date(year=1972, month=4, day=19)
+
+    def get_access_token(self) -> Optional[str]:
+        fn = 'get_access_token'
+
+        if self.token is not None and self.expires is not None and self.expires < datetime.datetime.utcnow():
+            print(f'{fn} - using cached access_token: {self.token[0:10]}...')
+            return self.token
+
+        auth0_url = os.environ['AUTH0_PLATFORM_URL']
+        platform_client_id = os.environ['AUTH0_PLATFORM_CLIENT_ID']
+        platform_client_secret = os.environ['AUTH0_PLATFORM_CLIENT_SECRET']
+        platform_audience = os.environ['AUTH0_PLATFORM_AUDIENCE']
+
+        auth0_payload = {
+            'grant_type': 'client_credentials',
+            'client_id': platform_client_id,
+            'client_secret': platform_client_secret,
+            'audience': platform_audience
+        }
+
+        headers = {
+            'content-type': 'application/x-www-form-urlencoded',
+            'accept': 'application/json'
+        }
+
+        try:
+            r = requests.post(auth0_url, data=auth0_payload, headers=headers)
+            r.raise_for_status()
+            json_data = json.loads(r.text)
+            self.token = json_data["access_token"]
+            self.expires = datetime.datetime.utcnow() + datetime.timedelta(seconds=json_data["expires_in"])
+            print(f'{fn} - successfully obtained new access_token: {self.token[0:10]}, expires on {self.expires}...')
+            return self.token
+        except requests.exceptions.HTTPError as err:
+            print(f'{fn} - could not get auth token, error: {err}')
+            return None
+
 
 token_manager = TokenManager()
 
@@ -23,19 +75,19 @@ def validate_input(event_body: Dict[str, Any]) -> bool:
     valid = True
     # Check the input - make sure we have everything
     if 'STAGE' not in os.environ:
-        print(f'missing STAGE environment variable')
+        print('missing STAGE environment variable')
         valid = False
     if 'AUTH0_PLATFORM_URL' not in os.environ:
-        print(f'missing AUTH0_PLATFORM_URL environment variable')
+        print('missing AUTH0_PLATFORM_URL environment variable')
         valid = False
     if 'AUTH0_PLATFORM_CLIENT_ID' not in os.environ:
-        print(f'missing AUTH0_PLATFORM_CLIENT_ID environment variable')
+        print('missing AUTH0_PLATFORM_CLIENT_ID environment variable')
         valid = False
     if 'AUTH0_PLATFORM_CLIENT_SECRET' not in os.environ:
-        print(f'missing AUTH0_PLATFORM_CLIENT_SECRET environment variable')
+        print('missing AUTH0_PLATFORM_CLIENT_SECRET environment variable')
         valid = False
     if 'AUTH0_PLATFORM_AUDIENCE' not in os.environ:
-        print(f'missing AUTH0_PLATFORM_AUDIENCE environment variable')
+        print('missing AUTH0_PLATFORM_AUDIENCE environment variable')
         valid = False
     if 'github_auth_token' not in event_body:
         print(f'{fn} - unable to generate criticality score report - missing github_auth_token from event data')
