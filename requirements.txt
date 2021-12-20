@@ -1,3 +1,6 @@
+# Copyright The Linux Foundation and each contributor to LFX.
+# SPDX-License-Identifier: MIT
+
 astroid==2.9.0
 aws-xray-sdk==2.8.0
 backports.entry-points-selectable==1.1.0

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright The Linux Foundation and each contributor to CommunityBridge.
+# Copyright The Linux Foundation and each contributor to LFX.
 # SPDX-License-Identifier: MIT
 
 import datetime

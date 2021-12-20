@@ -1,3 +1,6 @@
+# Copyright The Linux Foundation and each contributor to LFX.
+# SPDX-License-Identifier: MIT
+
 [MASTER]
 
 # A comma-separated list of package or module names from where C extensions may
