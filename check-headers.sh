@@ -3,11 +3,13 @@
 # Copyright The Linux Foundation and each contributor to LFX.
 # SPDX-License-Identifier: MIT
 
-# A simple script that scans the go files checking for the license header.
+# A simple script that scans the repository files checking for a license header.
 # Exits with a 0 if all source files have license headers
 # Exits with a 1 if one or more source files are missing a license header
 
-# These are the file patterns we should exclude - these are typically transient files not checked into source control
+# These are the file patterns we should exclude - these are typically transient
+# files not checked into source control or files that do not support
+# comments/license headers, such as binary or JSON files
 exclude_pattern='node_modules|venv|.venv|.vendor-new|.pytest_cache|.idea|\.serverless'
 
 files=()
@@ -42,7 +44,7 @@ missing_license_header=0
 # For each file...
 echo "Checking ${#files[@]} source code files for the license header..."
 for file in "${files[@]}"; do
-  echo "Processing file ${file}..."
+  # echo "Processing file ${file}..."
 
   # Header is typically one of the first few lines in the file...
   head -4 "${file}" | grep -q "${copyright_line}"
