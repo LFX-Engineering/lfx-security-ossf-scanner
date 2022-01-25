@@ -2,7 +2,7 @@
 # Copyright The Linux Foundation and each contributor to LFX.
 # SPDX-License-Identifier: MIT
 
-name: Build and Test Pull Request
+name: Yarn Dependency Audit
 
 on:
   # https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions
@@ -19,20 +19,10 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '14'
-      - name: Setup python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9' # Version range or exact version of a Python version to use, using SemVer's version range syntax
       - name: Setup
-        run: |
-          echo "Node version is: $(node --version)"
-          echo "Yarn version is: $(yarn --version)"
-          echo "Running top level install..."
-          yarn install
-      - name: Install Python Dependences
-        run: |
-          echo "Python version is: $(python --version)"
-          pip install -r requirements.txt
+        run: yarn install
+      - name: Yarn Audit
+        run: yarn audit
       - uses: ravsamhq/notify-slack-action@v1
         if: always()
         with:
