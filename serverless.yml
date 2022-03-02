@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: MIT
 
 service: lfx-security-ossf-scanner
-frameworkVersion: '^2.57.0'
+frameworkVersion: '^3.5.1'
+configValidationMode: warn
 variablesResolutionMode: 20210326
 
 package:
@@ -41,8 +42,8 @@ provider:
   stage: ${env:STAGE}
   region: us-east-2
   timeout: 900 # 15 minutes
-  logRetentionInDays: 14
-  lambdaHashingVersion: '20201221' # Resolution of lambda version hashes was improved with better algorithm, which will be used in next major release. Switch to it now by setting "provider.lambdaHashingVersion" to "20201221"
+  logRetentionInDays: 30 # must match one of the CF enum values {1, 3, 5, 7, 14, 30, 60, 90, ...}
+  lambdaHashingVersion: '20201221'  # Resolution of lambda version hashes was improved with better algorithm, which will be used in next major release. Switch to it now by setting "provider.lambdaHashingVersion" to "20201221" More Info: https://www.serverless.com/framework/docs/deprecations/#LAMBDA_HASHING_VERSION_V2
 
   iam:
     role:
