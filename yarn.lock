@@ -2817,10 +2817,10 @@ semver@^7.3.2, semver@^7.3.5:
   dependencies:
     lru-cache "^6.0.0"
 
-serverless-finch@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/serverless-finch/-/serverless-finch-3.0.0.tgz#3b6d2349bfc438ab08ad0f253513409a9ecc8b1c"
-  integrity sha512-rBWtoJQo/PKTR+Ar75MROsKaMJEJVeqL4FdKqEgoz7lGTNuKp1+vRek3fOcGpqxejK892P/2uR6LCz79HLb7dA==
+serverless-finch@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/serverless-finch/-/serverless-finch-4.0.0.tgz#f5f3be76e819ebb8dc6e3ddbef31ef85205f1467"
+  integrity sha512-/1w8uwX0693XFie1d7shoIlPI5eupH3W12OxFqT4Mf221561q0qvTdkGO201IqOQeEcbOi6bq237jwMFa+rYTA==
   dependencies:
     "@serverless/utils" "^6.0.2"
     is_js "^0.9.0"
