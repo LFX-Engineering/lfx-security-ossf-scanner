@@ -22,7 +22,7 @@ jmespath==0.10.0
 lazy-object-proxy==1.6.0
 mccabe==0.6.1
 platformdirs==2.4.0
-pycparser==2.20
+pycparser==2.21
 PyGithub==1.55
 PyJWT==2.4.0
 pylint==2.14.0
