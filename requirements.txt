@@ -20,7 +20,7 @@ idna==3.2
 isort==5.10.1
 jmespath==0.10.0
 lazy-object-proxy==1.6.0
-mccabe==0.6.1
+mccabe==0.7.0
 platformdirs==2.4.0
 pycparser==2.20
 PyGithub==1.55
