@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 service: lfx-security-ossf-scanner
-frameworkVersion: '^3.5.1'
+frameworkVersion: '^3.19.0'
 configValidationMode: warn
 variablesResolutionMode: 20210326
 
