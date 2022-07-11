@@ -14,7 +14,7 @@
     "remove:prod": "SLS_DEBUG=* ./node_modules/serverless/bin/serverless.js remove -s prod -r us-east-2 --verbose"
   },
   "dependencies": {
-    "serverless": "^3.19.0",
+    "serverless": "^3.20.0",
     "serverless-finch": "^4.0.0",
     "serverless-layers": "^2.5.4",
     "serverless-plugin-tracing": "^2.0.0",
