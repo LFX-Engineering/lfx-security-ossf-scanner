@@ -12,14 +12,14 @@ charset-normalizer==2.0.12
 criticality-score==1.0.7
 Deprecated==1.2.13
 dill==0.3.5.1
-distlib==0.3.3
+distlib==0.3.6
 fastjsonschema==2.15.1
 filelock==3.7.1
 future==0.18.2
 idna==3.3
 isort==5.10.1
 jmespath==0.10.0
-lazy-object-proxy==1.6.0
+lazy-object-proxy==1.9.0
 mccabe==0.7.0
 platformdirs==2.4.0
 pycparser==2.21
@@ -37,7 +37,7 @@ six==1.16.0
 toml==0.10.2
 tomli==2.0.1
 tomlkit==0.11.0
-typing_extensions==4.0.1
+typing_extensions==4.4.0
 urllib3==1.26.7
 virtualenv==20.14.1
-wrapt==1.13.1
+wrapt==1.14.1
