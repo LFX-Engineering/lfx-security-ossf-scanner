@@ -13,7 +13,7 @@ criticality-score==1.0.7
 Deprecated==1.2.13
 dill==0.3.5.1
 distlib==0.3.6
-fastjsonschema==2.15.1
+fastjsonschema==2.16.2
 filelock==3.7.1
 future==0.18.2
 idna==3.3
