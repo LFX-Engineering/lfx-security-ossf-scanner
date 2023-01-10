@@ -1,14 +1,14 @@
 # Copyright The Linux Foundation and each contributor to LFX.
 # SPDX-License-Identifier: MIT
 
-astroid==2.11.5
+astroid==2.12.13
 aws-xray-sdk==2.11.0
 backports.entry-points-selectable==1.1.1
 boto3==1.24.2
 botocore==1.27.2
 certifi==2022.12.7
 cffi==1.14.6
-charset-normalizer==3.0.1
+charset-normalizer==2.1.1
 criticality-score==1.0.7
 Deprecated==1.2.13
 dill==0.3.5.1
