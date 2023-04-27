@@ -21,7 +21,7 @@ isort==5.10.1
 jmespath==0.10.0
 lazy-object-proxy==1.9.0
 mccabe==0.7.0
-platformdirs==2.4.0
+platformdirs==3.4.0
 pycparser==2.21
 PyGithub==1.55
 PyJWT==2.4.0
