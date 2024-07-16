@@ -11,6 +11,10 @@ on:
       - v0.*
       - v1.*
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -34,6 +38,12 @@ jobs:
         run: |
           echo "Python version is: $(python --version)"
           pip install -r requirements.txt
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          audience: sts.amazonaws.com
+          role-to-assume: arn:aws:iam::716487311010:role/github-actions-deploy
+          aws-region: us-east-2
       - name: Deploy Backend
         run: |
           yarn install
@@ -41,8 +51,6 @@ jobs:
           SLS_DEBUG=* yarn sls deploy --verbose -s ${STAGE} -r ${AWS_REGION}
         env:
           AWS_REGION: us-east-2
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
           AUTH0_PLATFORM_URL: ${{ secrets.AUTH0_PLATFORM_URL_PROD }}
           AUTH0_PLATFORM_CLIENT_ID: ${{ secrets.AUTH0_PLATFORM_CLIENT_ID_PROD }}
           AUTH0_PLATFORM_CLIENT_SECRET: ${{ secrets.AUTH0_PLATFORM_CLIENT_SECRET_PROD }}
